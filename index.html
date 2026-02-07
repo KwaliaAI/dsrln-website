@@ -199,6 +199,7 @@ function DSRLN() {
   const [readControls, setReadControls] = useState(true);
   const [chatNotice, setChatNotice] = useState(false);
   const [logoHover, setLogoHover] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [vw, setVw] = useState(typeof window !== "undefined" ? window.innerWidth : 480);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -308,7 +309,7 @@ function DSRLN() {
       {LOGO_CHARS.map((lc, i) => (
         <span key={i} style={{
           fontFamily: F.mono, fontSize: 10, letterSpacing: lc.anchor ? "0.12em" : "0.12em",
-          color: lc.anchor ? c.dim : c.muted,
+          color: c.dim,
           display: "inline-block",
           maxWidth: lc.anchor ? "1em" : (logoExpanded ? "1em" : 0),
           opacity: lc.anchor ? 1 : (logoExpanded ? 1 : 0),
@@ -322,6 +323,60 @@ function DSRLN() {
     </div>
   );
 
+  // ─── MENU ICON (three descending lines) ───
+  const menuIcon = () => (
+    <div onClick={() => setShowMenu(v => !v)} style={{ cursor: "pointer", display: "flex", flexDirection: "column", gap: 3, padding: "4px 0" }}>
+      <div style={{ width: 16, height: 1.5, background: c.dim, transition: "background 0.2s" }} />
+      <div style={{ width: 12, height: 1.5, background: c.dim, transition: "background 0.2s" }} />
+      <div style={{ width: 8, height: 1.5, background: c.dim, transition: "background 0.2s" }} />
+    </div>
+  );
+
+  // ─── MENU OVERLAY ───
+  const renderMenu = () => (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 100, display: "flex", flexDirection: "column",
+      background: c.bg, animation: "fadeIn 0.2s ease-out",
+    }}>
+      <div style={{ padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${c.border}` }}>
+        {renderLogo(false)}
+        <div onClick={() => setShowMenu(false)} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 14, color: c.green }}>✕</div>
+      </div>
+      <div style={{ flex: 1, padding: "40px 24px", overflowY: "auto" }}>
+        {[
+          { label: "HOME", action: () => { goHome(); setShowMenu(false); } },
+          ...(auth
+            ? [{ label: "MY ACCOUNT", action: () => setShowMenu(false) }]
+            : [{ label: "SIGN IN", action: () => { setAuthMode("login"); setScreen("auth"); setShowMenu(false); } }]
+          ),
+          { label: "HOW IT WORKS", action: () => setShowMenu(false) },
+          { label: "FAQ", action: () => setShowMenu(false) },
+        ].map((item, i) => (
+          <div key={i} onClick={item.action} style={{
+            padding: "18px 0", borderBottom: `1px solid ${c.border}`, cursor: "pointer",
+            fontFamily: F.mono, fontSize: 11, letterSpacing: "0.1em", color: c.sub,
+            transition: "color 0.2s",
+          }}>
+            {item.label}
+          </div>
+        ))}
+
+        <div style={{ marginTop: 60 }}>
+          <div onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{
+            cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted, letterSpacing: "0.06em",
+          }}>
+            {mode === "dark" ? "◐ LIGHT MODE" : "◑ DARK MODE"}
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "20px 24px", borderTop: `1px solid ${c.border}` }}>
+        <div style={{ fontFamily: F.mono, fontSize: 8, color: c.muted, letterSpacing: "0.06em", lineHeight: 1.8 }}>
+          DESIRE LANE · Read a novel. Talk to the protagonist. They will listen.
+        </div>
+      </div>
+    </div>
+  );
+
   // ─── STICKY TOP BAR ───
   const topBar = (px, showBack) => (
     <div style={{
@@ -329,7 +384,7 @@ function DSRLN() {
       borderBottom: `1px solid ${c.border}`, flexShrink: 0, background: c.bg, zIndex: 50,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {showBack && <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted }}>←</div>}
+        {showBack && <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 14, color: c.green }}>←</div>}
         {renderLogo(screen !== "discover")}
       </div>
       <div style={{ display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>
@@ -338,9 +393,7 @@ function DSRLN() {
         ) : (
           <div onClick={() => { setAuthMode("login"); setScreen("auth"); }} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.accent, letterSpacing: "0.06em" }}>SIGN IN</div>
         )}
-        <div onClick={() => setMode(m => m === "dark" ? "light" : "dark")} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted }}>
-          {mode === "dark" ? "◐" : "◑"}
-        </div>
+        {menuIcon()}
       </div>
     </div>
   );
@@ -351,7 +404,7 @@ function DSRLN() {
   const renderAuth = () => (
     <div style={{ ...frame, height: "100vh", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "20px 24px 0" }}>
-        <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted }}>←</div>
+        <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 14, color: c.green }}>←</div>
       </div>
       <div style={{ flex: 1, ...narrow, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: 16, paddingBottom: 40 }}>
         <div style={{ display: "flex", gap: 20, marginBottom: 40 }}>
@@ -430,7 +483,7 @@ function DSRLN() {
           opacity: logoHover ? 1 : 0, maxHeight: logoHover ? 30 : 0, overflow: "hidden",
           transition: "opacity 0.4s ease 0.2s, max-height 0.4s ease 0.2s",
         }}>
-          Read a novel. Talk to the protagonist. She might leave.
+          Read a novel. Talk to the protagonist. They will listen.
         </div>
 
         <div style={{ height: 24 }} />
@@ -589,7 +642,7 @@ function DSRLN() {
           opacity: readControls ? 1 : 0, transition: "opacity 0.3s",
           pointerEvents: readControls ? "auto" : "none",
         }}>
-          <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted }}>←</div>
+          <div onClick={goHome} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 14, color: c.green }}>←</div>
           <div onClick={goHome} style={{ cursor: "pointer" }}>{renderLogo(true)}</div>
           <div style={{ fontFamily: F.mono, fontSize: 10, color: c.muted }}>
             {novel.currentCh} / {novel.chapters}
@@ -655,7 +708,7 @@ function DSRLN() {
   // ════════════════════════════════════════════
   const chatHeader = () => (
     <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${c.border}`, flexShrink: 0 }}>
-      <div onClick={() => setShowChat(false)} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted }}>{wide ? "✕" : "←"}</div>
+      <div onClick={() => setShowChat(false)} style={{ cursor: "pointer", fontFamily: F.mono, fontSize: 14, color: c.green }}>{wide ? "✕" : "←"}</div>
       <div style={{ width: 22, height: 22, borderRadius: "50%", background: novel.charColor, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.serif, fontSize: 11, color: "#fff" }}>{novel.character[0]}</div>
       <div style={{ fontFamily: F.sans, fontSize: 15, color: c.text }}>{novel.character}</div>
       <div style={{ marginLeft: "auto", fontFamily: F.mono, fontSize: 9, color: c.green, letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: 4 }}>
@@ -713,6 +766,7 @@ function DSRLN() {
         input::placeholder { color: ${c.muted}; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
         .dsrln-typing { animation: pulse 1.2s infinite; }
         ::-webkit-scrollbar { width: 0; height: 0; }
@@ -724,6 +778,7 @@ function DSRLN() {
       {screen === "auth" && renderAuth()}
       {screen === "story" && renderStory()}
       {screen === "read" && renderRead()}
+      {showMenu && renderMenu()}
     </>
   );
 }
