@@ -479,7 +479,7 @@ function DSRLN() {
   const renderDiscover = () => {
     const px = wide ? 48 : mid ? 32 : 20;
     return (
-    <div style={{ ...frame, minHeight: "100vh", overflowY: "auto", maxWidth: wide ? 1080 : undefined }}>
+    <div style={{ ...frame, height: "100vh", overflowY: "auto", WebkitOverflowScrolling: "touch", maxWidth: wide ? 1080 : undefined }}>
       {/* Top bar */}
       <div style={{ padding: `20px ${px}px 0`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div
@@ -667,7 +667,7 @@ function DSRLN() {
   const renderStory = () => {
     const px = wide ? 48 : mid ? 32 : 20;
     return (
-    <div style={{ ...frame, minHeight: "100vh", overflowY: "auto", maxWidth: wide ? 1080 : undefined }}>
+    <div style={{ ...frame, height: "100vh", overflowY: "auto", WebkitOverflowScrolling: "touch", maxWidth: wide ? 1080 : undefined }}>
       <div
         onClick={() => setScreen("discover")}
         style={{ padding: `20px ${px}px`, cursor: "pointer", fontFamily: F.mono, fontSize: 10, color: c.muted, letterSpacing: "0.06em" }}
